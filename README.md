@@ -1,7 +1,7 @@
 # Krakeneazy Infrastructure
 
 ```bash
-git clone https://github.com/Kaexburli/krakeneazy-infrastructure.git
+git clone https://github.com/Kaexburli/infrastructure.git
 ```
 Elements a changer 
 - Dans le fichier docker-compose.yml
