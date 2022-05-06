@@ -23,11 +23,11 @@ services:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
       - "traefik.http.routers.traefik-secure.entrypoints=websecure"
-      - "traefik.http.routers.traefik-secure.rule=Host(`traefik.[domaine].com`)"
+      - "traefik.http.routers.traefik-secure.rule=Host(`traefik.___domaine___.com`)"
       - "traefik.http.routers.traefik-secure.middlewares=user-auth@file"
       - "traefik.http.routers.traefik-secure.service=api@internal"
       - "traefik.http.routers.traefik-secure.middlewares=traefikIpwhitelist"
-      - "traefik.http.middlewares.traefikIpwhitelist.ipwhitelist.sourcerange=[ipwhitelistRange]"
+      - "traefik.http.middlewares.traefikIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
 
   portainer:
     image: portainer/portainer-ce:latest
@@ -45,10 +45,10 @@ services:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
       - "traefik.http.routers.portainer-secure.entrypoints=websecure"
-      - "traefik.http.routers.portainer-secure.rule=Host(`portainer.[domaine].com`)"
+      - "traefik.http.routers.portainer-secure.rule=Host(`portainer.___domaine___.com`)"
       - "traefik.http.routers.portainer-secure.service=portainer"
       - "traefik.http.routers.portainer-secure.middlewares=portainerIpwhitelist"
-      - "traefik.http.middlewares.portainerIpwhitelist.ipwhitelist.sourcerange=[ipwhitelistRange]"
+      - "traefik.http.middlewares.portainerIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
       - "traefik.http.services.portainer.loadbalancer.server.port=9000"
 
   uptime:
@@ -65,10 +65,10 @@ services:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
       - "traefik.http.routers.uptime-secure.entrypoints=websecure"
-      - "traefik.http.routers.uptime-secure.rule=Host(`uptime.[domaine].com`)"
+      - "traefik.http.routers.uptime-secure.rule=Host(`uptime.___domaine___.com`)"
       - "traefik.http.routers.uptime-secure.tls.certresolver=le"
       - "traefik.http.routers.uptime-secure.middlewares=uptimeIpwhitelist"
-      - "traefik.http.middlewares.uptimeIpwhitelist.ipwhitelist.sourcerange=[ipwhitelistRange]"
+      - "traefik.http.middlewares.uptimeIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
 
   vault:
     image: vault:latest
@@ -93,7 +93,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
-      - "traefik.http.routers.vault.rule=Host(`vault.[domaine].com`)"
+      - "traefik.http.routers.vault.rule=Host(`vault.___domaine___.com`)"
       - "traefik.http.routers.vault.entrypoints=websecure"
       - "traefik.http.routers.vault.tls=true"
       - "traefik.http.routers.vault.middlewares=vault-mw"
@@ -102,7 +102,7 @@ services:
       - "traefik.http.services.vault.loadbalancer.server.port=8200"
       - "traefik.vault.headers.customResponseHeaders=Access-Control-Allow-Origin:*"
       - "traefik.http.routers.vault.middlewares=vaultIpwhitelist"
-      - "traefik.http.middlewares.vaultIpwhitelist.ipwhitelist.sourcerange=[ipwhitelistRange]"
+      - "traefik.http.middlewares.vaultIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
 
 
 networks:
