@@ -1,0 +1,110 @@
+version: "3"
+
+services:
+
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - proxy
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.yml:/traefik.yml:ro
+      - ./traefik/acme.json:/acme.json
+      - ./traefik/configurations:/configurations
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.traefik-secure.entrypoints=websecure"
+      - "traefik.http.routers.traefik-secure.rule=Host(`traefik.[domaine].com`)"
+      - "traefik.http.routers.traefik-secure.middlewares=user-auth@file"
+      - "traefik.http.routers.traefik-secure.service=api@internal"
+      - "traefik.http.routers.traefik-secure.middlewares=traefikIpwhitelist"
+      - "traefik.http.middlewares.traefikIpwhitelist.ipwhitelist.sourcerange=[ipwhitelistRange]"
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - proxy
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./portainer:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.portainer-secure.entrypoints=websecure"
+      - "traefik.http.routers.portainer-secure.rule=Host(`portainer.[domaine].com`)"
+      - "traefik.http.routers.portainer-secure.service=portainer"
+      - "traefik.http.routers.portainer-secure.middlewares=portainerIpwhitelist"
+      - "traefik.http.middlewares.portainerIpwhitelist.ipwhitelist.sourcerange=[ipwhitelistRange]"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+
+  uptime:
+    image: "louislam/uptime-kuma:latest"
+    container_name: uptime
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - proxy
+    volumes:
+      - ./uptimekuma:/app/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.uptime-secure.entrypoints=websecure"
+      - "traefik.http.routers.uptime-secure.rule=Host(`uptime.[domaine].com`)"
+      - "traefik.http.routers.uptime-secure.tls.certresolver=le"
+      - "traefik.http.routers.uptime-secure.middlewares=uptimeIpwhitelist"
+      - "traefik.http.middlewares.uptimeIpwhitelist.ipwhitelist.sourcerange=[ipwhitelistRange]"
+
+  vault:
+    image: vault:latest
+    container_name: vault
+    restart: unless-stopped
+    networks:
+      - proxy
+    volumes:
+      - ./vault/config:/vault/config:rw
+      - ./vault/file:/vault/file:rw
+      - ./vault/logs:/vault/logs
+      - ./vault/policies:/vault/policies
+      - ./vault/data:/vault/data
+      - ./vault/certs:/vault/certs
+    cap_add:
+      - IPC_LOCK
+    entrypoint: vault server -config=/vault/config/config.hcl
+    environment:
+      - VAULT_ADDR=http://127.0.0.1:8200
+    ports:
+      - 8200:8200
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.vault.rule=Host(`vault.[domaine].com`)"
+      - "traefik.http.routers.vault.entrypoints=websecure"
+      - "traefik.http.routers.vault.tls=true"
+      - "traefik.http.routers.vault.middlewares=vault-mw"
+      - "traefik.http.middlewares.vault-mw.compress=true"
+      - "traefik.http.middlewares.vault-mw.compress.excludedcontenttypes=text/event-stream"
+      - "traefik.http.services.vault.loadbalancer.server.port=8200"
+      - "traefik.vault.headers.customResponseHeaders=Access-Control-Allow-Origin:*"
+      - "traefik.http.routers.vault.middlewares=vaultIpwhitelist"
+      - "traefik.http.middlewares.vaultIpwhitelist.ipwhitelist.sourcerange=[ipwhitelistRange]"
+
+
+networks:
+  proxy:
+    external: true
