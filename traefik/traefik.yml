@@ -34,13 +34,13 @@ certificatesResolvers:
       email: contact@___domaine___.com
       storage: acme.json
       keyType: EC384
-      onHostRule: true
+      # onHostRule: true
       httpChallenge:
         entryPoint: web
-      domains:
-        - main: ___domaine___.com
-          sans:
-            - traefik.___domaine___.com
-            - vault.___domaine___.com
-            - uptime.___domaine___.com
-            - portainer.___domaine___.com
+      # domains:
+      #   - main: ___domaine___.com
+      #     sans:
+      #       - traefik.___domaine___.com
+      #       - vault.___domaine___.com
+      #       - uptime.___domaine___.com
+      #       - portainer.___domaine___.com
