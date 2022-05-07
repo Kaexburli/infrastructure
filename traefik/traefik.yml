@@ -1,6 +1,6 @@
 log:
   level: DEBUG
-  filePath: logs/traefik.log
+  filePath: /logs/traefik.log
 
 api:
   dashboard: true
