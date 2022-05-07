@@ -19,6 +19,7 @@ services:
       - ./traefik/traefik.yml:/traefik.yml:ro
       - ./traefik/acme.json:/acme.json
       - ./traefik/configurations:/configurations
+      - ./traefik/logs:/logs
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
