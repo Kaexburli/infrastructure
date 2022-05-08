@@ -3,6 +3,10 @@ log:
   filePath: /logs/traefik.log
   format: json
 
+accessLog:
+  filePath: /logs/traefik.log
+  format: json
+
 api:
   dashboard: true
 

@@ -2,6 +2,7 @@ version: "3"
 
 services:
 
+  # TRAEFIK
   traefik:
     image: traefik:latest
     container_name: traefik
@@ -27,9 +28,10 @@ services:
       - "traefik.http.routers.traefik-secure.rule=Host(`traefik.___domaine___.com`)"
       - "traefik.http.routers.traefik-secure.middlewares=user-auth@file"
       - "traefik.http.routers.traefik-secure.service=api@internal"
-      #REMPLACE_AFTER_INSTALL- "traefik.http.routers.traefik-secure.middlewares=traefikIpwhitelist"
-      #REMPLACE_AFTER_INSTALL- "traefik.http.middlewares.traefikIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
+      #REMOVE_AFTER_INSTALL- "traefik.http.routers.traefik-secure.middlewares=traefikIpwhitelist"
+      #REMOVE_AFTER_INSTALL- "traefik.http.middlewares.traefikIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
 
+  # PORTAINER
   portainer:
     image: portainer/portainer-ce:latest
     container_name: portainer
@@ -49,9 +51,10 @@ services:
       - "traefik.http.routers.portainer-secure.rule=Host(`portainer.___domaine___.com`)"
       - "traefik.http.routers.portainer-secure.service=portainer"
       - "traefik.http.services.portainer.loadbalancer.server.port=9000"
-      #REMPLACE_AFTER_INSTALL- "traefik.http.routers.portainer-secure.middlewares=portainerIpwhitelist"
-      #REMPLACE_AFTER_INSTALL- "traefik.http.middlewares.portainerIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
+      #REMOVE_AFTER_INSTALL- "traefik.http.routers.portainer-secure.middlewares=portainerIpwhitelist"
+      #REMOVE_AFTER_INSTALL- "traefik.http.middlewares.portainerIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
 
+  # UPTIME-KUMA
   uptime:
     image: "louislam/uptime-kuma:latest"
     container_name: uptime
@@ -68,9 +71,10 @@ services:
       - "traefik.http.routers.uptime-secure.entrypoints=websecure"
       - "traefik.http.routers.uptime-secure.rule=Host(`uptime.___domaine___.com`)"
       - "traefik.http.routers.uptime-secure.tls.certresolver=le"
-      #REMPLACE_AFTER_INSTALL- "traefik.http.routers.uptime-secure.middlewares=uptimeIpwhitelist"
-      #REMPLACE_AFTER_INSTALL- "traefik.http.middlewares.uptimeIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
+      #REMOVE_AFTER_INSTALL- "traefik.http.routers.uptime-secure.middlewares=uptimeIpwhitelist"
+      #REMOVE_AFTER_INSTALL- "traefik.http.middlewares.uptimeIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
 
+  # VAULT
   vault:
     image: vault:latest
     container_name: vault
@@ -87,8 +91,8 @@ services:
     cap_add:
       - IPC_LOCK
     entrypoint: vault server -config=/vault/config/config.hcl
-    environment:
-      - VAULT_ADDR=http://127.0.0.1:8200
+    env_file: 
+      - ./.env
     ports:
       - 8200:8200
     labels:
@@ -102,41 +106,57 @@ services:
       - "traefik.http.middlewares.vault-mw.compress.excludedcontenttypes=text/event-stream"
       - "traefik.http.services.vault.loadbalancer.server.port=8200"
       - "traefik.vault.headers.customResponseHeaders=Access-Control-Allow-Origin:*"
-      #REMPLACE_AFTER_INSTALL- "traefik.http.routers.vault.middlewares=vaultIpwhitelist"
-      #REMPLACE_AFTER_INSTALL- "traefik.http.middlewares.vaultIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
+      #REMOVE_AFTER_INSTALL- "traefik.http.routers.vault.middlewares=vaultIpwhitelist"
+      #REMOVE_AFTER_INSTALL- "traefik.http.middlewares.vaultIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
 
+  # MONGO-DB
   mongodb:
-    image: mongo:latest
+    image: mongo
     container_name: mongodb
     restart: unless-stopped
+    env_file: 
+      - ./.env
+    command: [--auth]
+    volumes:
+      - ./mongodb/database:/data/db
     ports:
       - 27017:27017
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: qI65AfNuYAzSD2nv
-    volumes:
-      - ./mongodb/data:/data/db
+    labels:
+      - traefik.enable=true
+      - traefik.tcp.routers.db-1.entrypoints=websecure
+      - traefik.tcp.routers.db-1.service=db-1
+      - traefik.tcp.routers.db-1.rule=HostSNI(`db.___domaine___.com`)
+      - traefik.tcp.routers.db-1.tls=true
+      - traefik.tcp.routers.db-1.tls.certresolver=letsencrypt
+      - traefik.tcp.routers.db-1.tls.domains[0].main=___domaine___.com
+      - traefik.tcp.services.db-1.loadbalancer.server.port=27017
     networks:
       - proxy
-
+  
+  # MONGO-EXPRESS
   mongo-express:
     image: mongo-express
-    container_name: mongoex
-    restart: unless-stopped
+    container_name: mongo-express
+    env_file: 
+      - ./.env
+    volumes:
+      - ./mongodb/database:/data/db
+    depends_on:
+      - mongodb
+    networks:
+      - proxy
     ports:
       - 8081:8081
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: root
-      ME_CONFIG_MONGODB_ADMINPASSWORD: uYAzSD2nvqI65AfN
-      ME_CONFIG_MONGODB_URL: mongodb://root:qI65AfNuYAzSD2nv@mongo:27017/
+    restart: unless-stopped
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
       - "traefik.http.routers.mongo-express-secure.entrypoints=websecure"
       - "traefik.http.routers.mongo-express-secure.rule=Host(`db.___domaine___.com`)"
-      - "traefik.http.routers.mongo-express-secure.tls.certresolver=le"
-      #REMPLACE_AFTER_INSTALL- "traefik.http.routers.mongo-express-secure.middlewares=mongodbIpwhitelist"
-      #REMPLACE_AFTER_INSTALL- "traefik.http.middlewares.mongodbIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
+      - "traefik.http.routers.mongo-express-secure.service=mongo-express"
+      - "traefik.http.services.mongo-express.loadbalancer.server.port=8081"
+      #REMOVE_AFTER_INSTALL- "traefik.http.routers.mongo-express-secure.middlewares=mongodbIpwhitelist"
+      #REMOVE_AFTER_INSTALL- "traefik.http.middlewares.mongodbIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
 
 networks:
   proxy:
