@@ -121,6 +121,7 @@ services:
 
   mongo-express:
     image: mongo-express
+    container_name: mongoex
     restart: unless-stopped
     ports:
       - 8081:8081
