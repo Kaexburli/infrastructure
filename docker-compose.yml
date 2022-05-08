@@ -105,6 +105,37 @@ services:
       #REMPLACE_AFTER_INSTALL- "traefik.http.routers.vault.middlewares=vaultIpwhitelist"
       #REMPLACE_AFTER_INSTALL- "traefik.http.middlewares.vaultIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
 
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: unless-stopped
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: qI65AfNuYAzSD2nv
+    volumes:
+      - ./mongodb/data:/data/db
+    networks:
+      - proxy
+
+  mongo-express:
+    image: mongo-express
+    restart: unless-stopped
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: uYAzSD2nvqI65AfN
+      ME_CONFIG_MONGODB_URL: mongodb://root:qI65AfNuYAzSD2nv@mongo:27017/
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.mongo-express-secure.entrypoints=websecure"
+      - "traefik.http.routers.mongo-express-secure.rule=Host(`db.___domaine___.com`)"
+      - "traefik.http.routers.mongo-express-secure.tls.certresolver=le"
+      #REMPLACE_AFTER_INSTALL- "traefik.http.routers.mongo-express-secure.middlewares=mongodbIpwhitelist"
+      #REMPLACE_AFTER_INSTALL- "traefik.http.middlewares.mongodbIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
 
 networks:
   proxy:
