@@ -1,6 +1,7 @@
 log:
   level: DEBUG
   filePath: /logs/traefik.log
+  format: json
 
 api:
   dashboard: true
@@ -31,7 +32,7 @@ providers:
 certificatesResolvers:
   letsencrypt:
     acme:
-      email: contact@___domaine___.com
+      email: letsencrypt@___domaine___.com
       storage: acme.json
       keyType: EC384
       # onHostRule: true
