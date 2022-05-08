@@ -1,4 +1,4 @@
-# Krakeneazy Infrastructure
+#  Infrastructure
 
 ```bash
 git clone https://github.com/Kaexburli/infrastructure.git
