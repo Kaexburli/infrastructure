@@ -115,7 +115,7 @@ services:
       - IPC_LOCK
     entrypoint: vault server -config=/vault/config/config.hcl
     env_file: 
-      - ./.env
+      - ../.env
     ports:
       - 8200:8200
     labels:
@@ -138,7 +138,7 @@ services:
     container_name: mongodb
     restart: unless-stopped
     env_file: 
-      - ./.env
+      - ../.env
     command: [--auth]
     volumes:
       - ./mongodb/database:/data/db
@@ -161,7 +161,7 @@ services:
     image: mongo-express
     container_name: mongo-express
     env_file: 
-      - ./.env
+      - ../.env
     volumes:
       - ./mongodb/database:/data/db
     depends_on:
