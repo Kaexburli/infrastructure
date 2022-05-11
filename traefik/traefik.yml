@@ -40,4 +40,4 @@ certificatesResolvers:
       storage: acme.json
       keyType: EC384
       tlschallenge:
-        entryPoint: websecure
+        entryPoint: web
