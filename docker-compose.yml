@@ -93,7 +93,9 @@ services:
       - "traefik.docker.network=proxy"
       - "traefik.http.routers.uptime-secure.entrypoints=websecure"
       - "traefik.http.routers.uptime-secure.rule=Host(`uptime.___domaine___.com`)"
-      - "traefik.http.routers.uptime-secure.tls.certresolver=le"
+      - "traefik.http.routers.uptime-secure.tls=true"
+      - "traefik.http.routers.uptime-secure.tls.certresolver=letsencrypt"
+      - "traefik.http.services.uptime-secure.loadBalancer.server.port=3001"
       #REMOVE_AFTER_INSTALL- "traefik.http.routers.uptime-secure.middlewares=uptimeIpwhitelist"
       #REMOVE_AFTER_INSTALL- "traefik.http.middlewares.uptimeIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
 
