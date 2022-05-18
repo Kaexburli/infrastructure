@@ -1,8 +1,13 @@
 version: "3"
 
+################################################################################
+# SERVICES
+################################################################################
 services:
 
+  # ------------------------------------------------------------
   # TRAEFIK
+  # ------------------------------------------------------------
   traefik:
     image: traefik:latest
     container_name: traefik
@@ -32,7 +37,9 @@ services:
       #REMOVE_AFTER_INSTALL- "traefik.http.routers.traefik-secure.middlewares=traefikIpwhitelist"
       #REMOVE_AFTER_INSTALL- "traefik.http.middlewares.traefikIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
 
+  # ------------------------------------------------------------
   # NGINX-ERROR - The error pages server
+  # ------------------------------------------------------------
   nginx-error:
     image: nginx:latest
     container_name: nginx-error
@@ -54,7 +61,9 @@ services:
       - "traefik.http.middlewares.error-pages-middleware.errors.service=error-pages-service"
       - "traefik.http.services.error-pages-service.loadbalancer.server.port=80"
 
+  # ------------------------------------------------------------
   # PORTAINER
+  # ------------------------------------------------------------
   portainer:
     image: portainer/portainer-ce:latest
     container_name: portainer
@@ -77,7 +86,9 @@ services:
       #REMOVE_AFTER_INSTALL- "traefik.http.routers.portainer-secure.middlewares=portainerIpwhitelist"
       #REMOVE_AFTER_INSTALL- "traefik.http.middlewares.portainerIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
 
+  # ------------------------------------------------------------
   # UPTIME-KUMA
+  # ------------------------------------------------------------
   uptime:
     image: "louislam/uptime-kuma:latest"
     container_name: uptime
@@ -99,7 +110,9 @@ services:
       #REMOVE_AFTER_INSTALL- "traefik.http.routers.uptime-secure.middlewares=uptimeIpwhitelist"
       #REMOVE_AFTER_INSTALL- "traefik.http.middlewares.uptimeIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
 
+  # ------------------------------------------------------------
   # VAULT
+  # ------------------------------------------------------------
   vault:
     image: vault:latest
     container_name: vault
@@ -134,7 +147,9 @@ services:
       #REMOVE_AFTER_INSTALL- "traefik.http.routers.vault.middlewares=vaultIpwhitelist"
       #REMOVE_AFTER_INSTALL- "traefik.http.middlewares.vaultIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
 
+  # ------------------------------------------------------------
   # MONGO-DB
+  # ------------------------------------------------------------
   mongodb:
     image: mongo
     container_name: mongodb
@@ -158,7 +173,9 @@ services:
     networks:
       - proxy
   
+  # ------------------------------------------------------------
   # MONGO-EXPRESS
+  # ------------------------------------------------------------
   mongo-express:
     image: mongo-express
     container_name: mongo-express
@@ -183,6 +200,36 @@ services:
       #REMOVE_AFTER_INSTALL- "traefik.http.routers.mongo-express-secure.middlewares=mongodbIpwhitelist"
       #REMOVE_AFTER_INSTALL- "traefik.http.middlewares.mongodbIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
 
+  # ------------------------------------------------------------
+  # KRAKENEAZY
+  # ------------------------------------------------------------
+  krakeneazy:
+    restart: unless-stopped
+    container_name: krakeneazy
+    build:
+      context: ./
+      dockerfile: ./krakeneazy/Dockerfile
+    depends_on:
+      - mongodb
+    networks:
+      - proxy
+    ports:
+      - '5000:5000'
+      - '9000:9000'
+    volumes:
+      - ./src:/home/krakeneazy:rw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.krakeneazy-secure.entrypoints=websecure"
+      - "traefik.http.routers.krakeneazy-secure.rule=Host(`www.___domaine___.com`)"
+      - "traefik.http.routers.krakeneazy-secure.service=krakeneazy"
+      - "traefik.http.services.krakeneazy.loadbalancer.server.port=5000"
+      - "traefik.http.services.krakeneazy.loadbalancer.server.port=9000"
+
+################################################################################
+# NETWORK
+################################################################################
 networks:
   proxy:
     external: true
