@@ -201,14 +201,14 @@ services:
       #REMOVE_AFTER_INSTALL- "traefik.http.middlewares.mongodbIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
 
   # ------------------------------------------------------------
-  # KRAKENEAZY
+  # WEBAPP
   # ------------------------------------------------------------
-  krakeneazy:
+  webapp:
     restart: unless-stopped
-    container_name: krakeneazy
+    container_name: webapp
     build:
       context: ./
-      dockerfile: ./krakeneazy/Dockerfile
+      dockerfile: ./webapp/Dockerfile
     depends_on:
       - mongodb
     networks:
@@ -217,15 +217,15 @@ services:
       - '5000:5000'
       - '9000:9000'
     volumes:
-      - ./src:/home/krakeneazy:rw
+      - ./webapp/src:/home/app:rw
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
-      - "traefik.http.routers.krakeneazy-secure.entrypoints=websecure"
-      - "traefik.http.routers.krakeneazy-secure.rule=Host(`www.___domaine___.com`)"
-      - "traefik.http.routers.krakeneazy-secure.service=krakeneazy"
-      - "traefik.http.services.krakeneazy.loadbalancer.server.port=5000"
-      - "traefik.http.services.krakeneazy.loadbalancer.server.port=9000"
+      - "traefik.http.routers.webapp-secure.entrypoints=websecure"
+      - "traefik.http.routers.webapp-secure.rule=Host(`www.___domaine___.com`)"
+      - "traefik.http.routers.webapp-secure.service=webapp"
+      - "traefik.http.services.webapp.loadbalancer.server.port=5000"
+      - "traefik.http.services.webapp.loadbalancer.server.port=9000"
 
 ################################################################################
 # NETWORK
