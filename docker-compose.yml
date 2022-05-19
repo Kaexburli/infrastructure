@@ -203,29 +203,27 @@ services:
   # ------------------------------------------------------------
   # WEBAPP
   # ------------------------------------------------------------
-  # webapp:
-  #   restart: unless-stopped
-  #   container_name: webapp
-  #   build:
-  #     context: ./
-  #     dockerfile: ./webapp/Dockerfile
-  #   depends_on:
-  #     - mongodb
-  #   networks:
-  #     - proxy
-  #   ports:
-  #     - '5000:5000'
-  #     - '9000:9000'
-  #   volumes:
-  #     - ./webapp/src:/home/app:rw
-  #   labels:
-  #     - "traefik.enable=true"
-  #     - "traefik.docker.network=proxy"
-  #     - "traefik.http.routers.webapp-secure.entrypoints=websecure"
-  #     - "traefik.http.routers.webapp-secure.rule=Host(`www.___domaine___.com`)"
-  #     - "traefik.http.routers.webapp-secure.service=webapp"
-  #     - "traefik.http.services.webapp.loadbalancer.server.port=5000"
-  #     - "traefik.http.services.webapp.loadbalancer.server.port=9000"
+  webapp:
+    image: websitedev/krakeneazy:latest
+    restart: unless-stopped
+    container_name: webapp
+    depends_on:
+      - mongodb
+    networks:
+      - proxy
+    ports:
+      - '5000:5000'
+      - '8000:8000'
+    volumes:
+      - ./webapp/src:/home/app:rw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.webapp-secure.entrypoints=websecure"
+      - "traefik.http.routers.webapp-secure.rule=Host(`www.___domaine___.com`)"
+      - "traefik.http.routers.webapp-secure.service=webapp"
+      - "traefik.http.services.webapp.loadbalancer.server.port=5000"
+      - "traefik.http.services.webapp.loadbalancer.server.port=8000"
 
 ################################################################################
 # NETWORK
