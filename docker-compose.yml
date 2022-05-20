@@ -194,7 +194,7 @@ services:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
       - "traefik.http.routers.mongo-express-secure.entrypoints=websecure"
-      - "traefik.http.routers.mongo-express-secure.rule=Host(`db.___domaine___.com`)"
+      - "traefik.http.routers.mongo-express-secure.rule=Host(`dbadmin.___domaine___.com`)"
       - "traefik.http.routers.mongo-express-secure.service=mongo-express"
       - "traefik.http.services.mongo-express.loadbalancer.server.port=8081"
       #REMOVE_AFTER_INSTALL- "traefik.http.routers.mongo-express-secure.middlewares=mongodbIpwhitelist"
