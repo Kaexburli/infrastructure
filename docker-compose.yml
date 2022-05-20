@@ -215,7 +215,7 @@ services:
       - '5000:5000'
       - '8000:8000'
     volumes:
-      - ./krakeneazy/.env:/home/webapp/.env
+      - ./webapp/.env:/home/webapp/.env
     labels:
       # Frontend
       - "traefik.enable=true"
