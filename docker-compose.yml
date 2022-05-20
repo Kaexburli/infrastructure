@@ -204,7 +204,7 @@ services:
   # WEBAPP
   # ------------------------------------------------------------
   webapp:
-    image: websitedev/krakeneazy:latest
+    image: websitedev/krakeneazy:v1.0
     restart: unless-stopped
     container_name: webapp
     depends_on:
@@ -215,18 +215,23 @@ services:
       - '5000:5000'
       - '8000:8000'
     volumes:
-      - ./webapp/.env:/home/webapp/.env
+      - ./krakeneazy/.env:/home/webapp/.env
     labels:
+      # Frontend
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
       - "traefik.http.routers.webapp-frontend.entrypoints=websecure"
       - "traefik.http.routers.webapp-frontend.rule=Host(`webapp.___domaine___.com`)"
       - "traefik.http.routers.webapp-frontend.service=webappfrontend"
       - "traefik.http.services.webappfrontend.loadbalancer.server.port=5000"
-      - "traefik.http.routers.webapp-backend.entrypoints=websecure"
-      - "traefik.http.routers.webapp-backend.rule=Host(`api.___domaine___.com`)"
-      - "traefik.http.routers.webapp-backend.service=webappbackend"
-      - "traefik.http.services.webappbackend.loadbalancer.server.port=8000"
+      # Backend
+      - traefik.tcp.routers.webapp-backend.entrypoints=websecure
+      - traefik.tcp.routers.webapp-backend.service=webappbackend
+      - traefik.tcp.routers.webappbackend.rule=HostSNI(`api.___domaine___.com`)
+      - traefik.tcp.routers.webappbackend.tls=true
+      - traefik.tcp.routers.webappbackend.tls.certresolver=letsencrypt
+      - traefik.tcp.routers.webappbackend.tls.domains[0].main=___domaine___.com
+      - traefik.tcp.services.webappbackend.loadbalancer.server.port=8000
 
 ################################################################################
 # NETWORK
