@@ -30,7 +30,7 @@ services:
       - traefik.enable=true
       - traefik.docker.network=proxy
       - traefik.http.routers.traefik-secure.entrypoints=websecure
-      - traefik.http.routers.traefik-secure.rule=Host(`traefik.___domaine___.com`)
+      - traefik.http.routers.traefik-secure.rule=Host(`traefik.___domaine___`)
       - traefik.http.routers.traefik-secure.middlewares=user-auth@file
       - traefik.http.routers.traefik-secure.service=api@internal
       - traefik.http.routers.traefik-secure.middlewares=error-pages-middleware
@@ -83,13 +83,13 @@ services:
       - traefik.enable=true
       - traefik.docker.network=proxy
       # Frontend
-      - traefik.http.routers.portainer-secure.rule=Host(`portainer.___domaine___.com`)
+      - traefik.http.routers.portainer-secure.rule=Host(`portainer.___domaine___`)
       - traefik.http.routers.portainer-secure.entrypoints=websecure
       - traefik.http.routers.portainer-secure.service=portainer
       - traefik.http.services.portainer.loadbalancer.server.port=9000
       - traefik.http.routers.portainer.tls.certresolver=letsencrypt
       # Edge
-      - traefik.http.routers.portainer-edge.rule=Host(`edge.___domaine___.com`)
+      - traefik.http.routers.portainer-edge.rule=Host(`edge.___domaine___`)
       - traefik.http.routers.portainer-edge.entrypoints=websecure
       - traefik.http.routers.portainer-edge.service=portaineredge
       - traefik.http.services.portaineredge.loadbalancer.server.port=8000
@@ -116,7 +116,7 @@ services:
       - traefik.enable=true
       - traefik.docker.network=proxy
       - traefik.http.routers.uptime-secure.entrypoints=websecure
-      - traefik.http.routers.uptime-secure.rule=Host(`uptime.___domaine___.com`)
+      - traefik.http.routers.uptime-secure.rule=Host(`uptime.___domaine___`)
       - traefik.http.routers.uptime-secure.tls=true
       - traefik.http.routers.uptime-secure.tls.certresolver=letsencrypt
       - traefik.http.services.uptime-secure.loadBalancer.server.port=3001
@@ -149,7 +149,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
-      - traefik.http.routers.vault.rule=Host(`vault.___domaine___.com`)
+      - traefik.http.routers.vault.rule=Host(`vault.___domaine___`)
       - traefik.http.routers.vault.entrypoints=websecure
       - traefik.http.routers.vault.tls=true
       - traefik.http.routers.vault.middlewares=vault-mw
@@ -209,7 +209,7 @@ services:
       - traefik.enable=true
       - traefik.docker.network=proxy
       - traefik.http.routers.mongo-express-secure.entrypoints=websecure
-      - traefik.http.routers.mongo-express-secure.rule=Host(`dbadmin.___domaine___.com`)
+      - traefik.http.routers.mongo-express-secure.rule=Host(`dbadmin.___domaine___`)
       - traefik.http.routers.mongo-express-secure.service=mongo-express
       - traefik.http.services.mongo-express.loadbalancer.server.port=8081
       #REMOVE_AFTER_INSTALL- traefik.http.routers.mongo-express-secure.middlewares=mongodbIpwhitelist
@@ -237,13 +237,13 @@ services:
       - traefik.enable=true
       - traefik.docker.network=proxy
       # FRONTEND
-      - traefik.http.routers.webapp-frontend.rule=Host(`webapp.___domaine___.com`)
+      - traefik.http.routers.webapp-frontend.rule=Host(`webapp.___domaine___`)
       - traefik.http.routers.webapp-frontend.entrypoints=websecure
       - traefik.http.routers.webapp-frontend.service=webappfrontend
       - traefik.http.services.webappfrontend.loadbalancer.server.port=5000
       - traefik.http.routers.webappfrontend.tls.certresolver=letsencrypt
       # BACKEND
-      - traefik.http.routers.webapp-backend.rule=Host(`webapp.___domaine___.com`) && PathPrefix(`/api/`)
+      - traefik.http.routers.webapp-backend.rule=Host(`webapp.___domaine___`) && PathPrefix(`/api/`)
       - traefik.http.routers.webapp-backend.entrypoints=websecure
       - traefik.http.routers.webapp-backend.service=webappbackend
       - traefik.http.services.webappbackend.loadbalancer.server.port=6000
