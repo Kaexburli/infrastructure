@@ -27,15 +27,15 @@ services:
       - ./traefik/configurations:/configurations
       - ./traefik/logs:/logs
     labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
-      - "traefik.http.routers.traefik-secure.entrypoints=websecure"
-      - "traefik.http.routers.traefik-secure.rule=Host(`traefik.___domaine___.com`)"
-      - "traefik.http.routers.traefik-secure.middlewares=user-auth@file"
-      - "traefik.http.routers.traefik-secure.service=api@internal"
-      - "traefik.http.routers.traefik-secure.middlewares=error-pages-middleware"
-      #REMOVE_AFTER_INSTALL- "traefik.http.routers.traefik-secure.middlewares=traefikIpwhitelist"
-      #REMOVE_AFTER_INSTALL- "traefik.http.middlewares.traefikIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.traefik-secure.entrypoints=websecure
+      - traefik.http.routers.traefik-secure.rule=Host(`traefik.___domaine___.com`)
+      - traefik.http.routers.traefik-secure.middlewares=user-auth@file
+      - traefik.http.routers.traefik-secure.service=api@internal
+      - traefik.http.routers.traefik-secure.middlewares=error-pages-middleware
+      #REMOVE_AFTER_INSTALL- traefik.http.routers.traefik-secure.middlewares=traefikIpwhitelist
+      #REMOVE_AFTER_INSTALL- traefik.http.middlewares.traefikIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___
 
   # ------------------------------------------------------------
   # NGINX-ERROR - The error pages server
@@ -50,16 +50,16 @@ services:
     networks:
       - proxy
     labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
-      - "traefik.http.routers.error-router.rule=HostRegexp(`{host:.+}`)"
-      - "traefik.http.routers.error-router.priority=1"
-      - "traefik.http.routers.error-router.entrypoints=websecure"
-      - "traefik.http.routers.error-router.middlewares=error-pages-middleware"
-      - "traefik.http.middlewares.error-pages-middleware.errors.status=400-599"
-      - "traefik.http.middlewares.error-pages-middleware.errors.query=/{status}.html"
-      - "traefik.http.middlewares.error-pages-middleware.errors.service=error-pages-service"
-      - "traefik.http.services.error-pages-service.loadbalancer.server.port=80"
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.error-router.rule=HostRegexp(`{host:.+}`)
+      - traefik.http.routers.error-router.priority=1
+      - traefik.http.routers.error-router.entrypoints=websecure
+      - traefik.http.routers.error-router.middlewares=error-pages-middleware
+      - traefik.http.middlewares.error-pages-middleware.errors.status=400-599
+      - traefik.http.middlewares.error-pages-middleware.errors.query=/{status}.html
+      - traefik.http.middlewares.error-pages-middleware.errors.service=error-pages-service
+      - traefik.http.services.error-pages-service.loadbalancer.server.port=80
 
   # ------------------------------------------------------------
   # PORTAINER
@@ -76,21 +76,32 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./portainer:/data
+    depends_on:
+      - traefik
     labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
-      - "traefik.http.routers.portainer-secure.entrypoints=websecure"
-      - "traefik.http.routers.portainer-secure.rule=Host(`portainer.___domaine___.com`)"
-      - "traefik.http.routers.portainer-secure.service=portainer"
-      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
-      #REMOVE_AFTER_INSTALL- "traefik.http.routers.portainer-secure.middlewares=portainerIpwhitelist"
-      #REMOVE_AFTER_INSTALL- "traefik.http.middlewares.portainerIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
+      # Base
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      # Frontend
+      - traefik.http.routers.portainer-secure.rule=Host(`portainer.___domaine___.com`)
+      - traefik.http.routers.portainer-secure.entrypoints=websecure
+      - traefik.http.routers.portainer-secure.service=portainer
+      - traefik.http.services.portainer.loadbalancer.server.port=9000
+      - traefik.http.routers.portainer.tls.certresolver=letsencrypt
+      # Edge
+      - traefik.http.routers.portainer-edge.rule=Host(`edge.___domaine___.com`)
+      - traefik.http.routers.portainer-edge.entrypoints=websecure
+      - traefik.http.routers.portainer-edge.service=portaineredge
+      - traefik.http.services.portaineredge.loadbalancer.server.port=8000
+      - traefik.http.routers.portaineredge.tls.certresolver=letsencrypt
+      #REMOVE_AFTER_INSTALL- traefik.http.routers.portainer-secure.middlewares=portainerIpwhitelist
+      #REMOVE_AFTER_INSTALL- traefik.http.middlewares.portainerIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___
 
   # ------------------------------------------------------------
   # UPTIME-KUMA
   # ------------------------------------------------------------
   uptime:
-    image: "louislam/uptime-kuma:latest"
+    image: louislam/uptime-kuma:latest
     container_name: uptime
     restart: unless-stopped
     security_opt:
@@ -99,16 +110,18 @@ services:
       - proxy
     volumes:
       - ./uptimekuma:/app/data
+    depends_on:
+      - traefik
     labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
-      - "traefik.http.routers.uptime-secure.entrypoints=websecure"
-      - "traefik.http.routers.uptime-secure.rule=Host(`uptime.___domaine___.com`)"
-      - "traefik.http.routers.uptime-secure.tls=true"
-      - "traefik.http.routers.uptime-secure.tls.certresolver=letsencrypt"
-      - "traefik.http.services.uptime-secure.loadBalancer.server.port=3001"
-      #REMOVE_AFTER_INSTALL- "traefik.http.routers.uptime-secure.middlewares=uptimeIpwhitelist"
-      #REMOVE_AFTER_INSTALL- "traefik.http.middlewares.uptimeIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.uptime-secure.entrypoints=websecure
+      - traefik.http.routers.uptime-secure.rule=Host(`uptime.___domaine___.com`)
+      - traefik.http.routers.uptime-secure.tls=true
+      - traefik.http.routers.uptime-secure.tls.certresolver=letsencrypt
+      - traefik.http.services.uptime-secure.loadBalancer.server.port=3001
+      #REMOVE_AFTER_INSTALL- traefik.http.routers.uptime-secure.middlewares=uptimeIpwhitelist
+      #REMOVE_AFTER_INSTALL- traefik.http.middlewares.uptimeIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___
 
   # ------------------------------------------------------------
   # VAULT
@@ -134,18 +147,18 @@ services:
     ports:
       - 8200:8200
     labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
-      - "traefik.http.routers.vault.rule=Host(`vault.___domaine___.com`)"
-      - "traefik.http.routers.vault.entrypoints=websecure"
-      - "traefik.http.routers.vault.tls=true"
-      - "traefik.http.routers.vault.middlewares=vault-mw"
-      - "traefik.http.middlewares.vault-mw.compress=true"
-      - "traefik.http.middlewares.vault-mw.compress.excludedcontenttypes=text/event-stream"
-      - "traefik.http.services.vault.loadbalancer.server.port=8200"
-      - "traefik.vault.headers.customResponseHeaders=Access-Control-Allow-Origin:*"
-      #REMOVE_AFTER_INSTALL- "traefik.http.routers.vault.middlewares=vaultIpwhitelist"
-      #REMOVE_AFTER_INSTALL- "traefik.http.middlewares.vaultIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.vault.rule=Host(`vault.___domaine___.com`)
+      - traefik.http.routers.vault.entrypoints=websecure
+      - traefik.http.routers.vault.tls=true
+      - traefik.http.routers.vault.middlewares=vault-mw
+      - traefik.http.middlewares.vault-mw.compress=true
+      - traefik.http.middlewares.vault-mw.compress.excludedcontenttypes=text/event-stream
+      - traefik.http.services.vault.loadbalancer.server.port=8200
+      - traefik.vault.headers.customResponseHeaders=Access-Control-Allow-Origin:*
+      #REMOVE_AFTER_INSTALL- traefik.http.routers.vault.middlewares=vaultIpwhitelist
+      #REMOVE_AFTER_INSTALL- traefik.http.middlewares.vaultIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___
 
   # ------------------------------------------------------------
   # MONGO-DB
@@ -161,15 +174,16 @@ services:
       - ./mongodb/database:/data/db
     ports:
       - 27017:27017
+    depends_on:
+      - traefik
     labels:
       - traefik.enable=true
-      - traefik.tcp.routers.db-1.entrypoints=websecure
-      - traefik.tcp.routers.db-1.service=db-1
-      - traefik.tcp.routers.db-1.rule=HostSNI(`db.___domaine___.com`)
-      - traefik.tcp.routers.db-1.tls=true
-      - traefik.tcp.routers.db-1.tls.certresolver=letsencrypt
-      - traefik.tcp.routers.db-1.tls.domains[0].main=___domaine___.com
-      - traefik.tcp.services.db-1.loadbalancer.server.port=27017
+      - traefik.tcp.routers.database.entrypoints=websecure
+      - traefik.tcp.routers.database.service=database
+      - traefik.tcp.routers.database.rule=HostSNI(`*`)
+      - traefik.tcp.routers.database.tls=true
+      - traefik.tcp.routers.database.tls.certresolver=letsencrypt
+      - traefik.tcp.services.database.loadbalancer.server.port=27017
     networks:
       - proxy
   
@@ -184,6 +198,7 @@ services:
     volumes:
       - ./mongodb/database:/data/db
     depends_on:
+      - traefik
       - mongodb
     networks:
       - proxy
@@ -191,47 +206,48 @@ services:
       - 8081:8081
     restart: unless-stopped
     labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
-      - "traefik.http.routers.mongo-express-secure.entrypoints=websecure"
-      - "traefik.http.routers.mongo-express-secure.rule=Host(`dbadmin.___domaine___.com`)"
-      - "traefik.http.routers.mongo-express-secure.service=mongo-express"
-      - "traefik.http.services.mongo-express.loadbalancer.server.port=8081"
-      #REMOVE_AFTER_INSTALL- "traefik.http.routers.mongo-express-secure.middlewares=mongodbIpwhitelist"
-      #REMOVE_AFTER_INSTALL- "traefik.http.middlewares.mongodbIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___"
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.mongo-express-secure.entrypoints=websecure
+      - traefik.http.routers.mongo-express-secure.rule=Host(`dbadmin.___domaine___.com`)
+      - traefik.http.routers.mongo-express-secure.service=mongo-express
+      - traefik.http.services.mongo-express.loadbalancer.server.port=8081
+      #REMOVE_AFTER_INSTALL- traefik.http.routers.mongo-express-secure.middlewares=mongodbIpwhitelist
+      #REMOVE_AFTER_INSTALL- traefik.http.middlewares.mongodbIpwhitelist.ipwhitelist.sourcerange=___ipwhitelistRange___
 
   # ------------------------------------------------------------
   # WEBAPP
   # ------------------------------------------------------------
   webapp:
-    image: websitedev/krakeneazy:v1.0
+    image: websitedev/krakeneazy:v1.01
     restart: unless-stopped
     container_name: webapp
     depends_on:
+      - traefik
       - mongodb
     networks:
       - proxy
     ports:
       - '5000:5000'
-      - '8000:8000'
+      - '6000:6000'
     volumes:
       - ./webapp/.env:/home/webapp/.env
     labels:
-      # Frontend
-      - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
-      - "traefik.http.routers.webapp-frontend.entrypoints=websecure"
-      - "traefik.http.routers.webapp-frontend.rule=Host(`webapp.___domaine___.com`)"
-      - "traefik.http.routers.webapp-frontend.service=webappfrontend"
-      - "traefik.http.services.webappfrontend.loadbalancer.server.port=5000"
-      # Backend
-      - traefik.tcp.routers.webapp-backend.entrypoints=websecure
-      - traefik.tcp.routers.webapp-backend.service=webappbackend
-      - traefik.tcp.routers.webappbackend.rule=HostSNI(`api.___domaine___.com`)
-      - traefik.tcp.routers.webappbackend.tls=true
-      - traefik.tcp.routers.webappbackend.tls.certresolver=letsencrypt
-      - traefik.tcp.routers.webappbackend.tls.domains[0].main=___domaine___.com
-      - traefik.tcp.services.webappbackend.loadbalancer.server.port=8000
+      # WEBAPP
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      # FRONTEND
+      - traefik.http.routers.webapp-frontend.rule=Host(`webapp.___domaine___.com`)
+      - traefik.http.routers.webapp-frontend.entrypoints=websecure
+      - traefik.http.routers.webapp-frontend.service=webappfrontend
+      - traefik.http.services.webappfrontend.loadbalancer.server.port=5000
+      - traefik.http.routers.webappfrontend.tls.certresolver=letsencrypt
+      # BACKEND
+      - traefik.http.routers.webapp-backend.rule=Host(`webapp.___domaine___.com`) && PathPrefix(`/api/`)
+      - traefik.http.routers.webapp-backend.entrypoints=websecure
+      - traefik.http.routers.webapp-backend.service=webappbackend
+      - traefik.http.services.webappbackend.loadbalancer.server.port=6000
+      - traefik.http.routers.webappbackend.tls.certresolver=letsencrypt
 
 ################################################################################
 # NETWORK
