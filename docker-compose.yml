@@ -219,7 +219,7 @@ services:
   # WEBAPP
   # ------------------------------------------------------------
   webapp:
-    image: websitedev/krakeneazy:v1.01
+    image: websitedev/krakeneazy:v1.0
     restart: unless-stopped
     container_name: webapp
     depends_on:
