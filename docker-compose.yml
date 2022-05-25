@@ -229,7 +229,7 @@ services:
       - proxy
     ports:
       - '5000:5000'
-      - '6000:6000'
+      - '9000:6000'
     volumes:
       - ./webapp/.env:/home/webapp/.env
     labels:
